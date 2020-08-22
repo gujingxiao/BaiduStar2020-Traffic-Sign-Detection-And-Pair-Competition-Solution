@@ -1,0 +1,77 @@
+mode: 'train'
+ARCHITECTURE:
+    name: 'ResNeXt101_vd_64x4d'
+
+pretrained_model: "./output/ResNeXt101_vd_64x4d/final_best_model_160/ppcls"
+model_save_dir: "./output/"
+classes_num: 20
+total_images: 42432
+save_interval: 1
+validate: True
+valid_interval: 1
+epochs: 20
+topk: 2
+image_shape: [3, 160, 160]
+
+use_mix: True
+ls_epsilon: 0.1
+
+LEARNING_RATE:
+    function: 'Cosine'
+    params:
+        lr: 0.05
+
+OPTIMIZER:
+    function: 'Momentum'
+    params:
+        momentum: 0.9
+    regularizer:
+        function: 'L2'
+        factor: 0.000100
+
+TRAIN:
+    batch_size: 128
+    num_workers: 4
+    file_list: "/media/gujingxiao/f577505e-73a2-41d0-829c-eb4d01efa827/BaiduStar2020/final_classification/train_list.txt"
+    data_dir: "/media/gujingxiao/f577505e-73a2-41d0-829c-eb4d01efa827/BaiduStar2020/final_classification/"
+    shuffle_seed: 0
+    transforms:
+        - DecodeImage:
+            to_rgb: True
+            to_np: False
+            channel_first: False
+        - RandCropImage:
+            size: 160
+        #- RandFlipImage:
+        #    flip_code: 1
+        - NormalizeImage:
+            scale: 1./255.
+            mean: [0.485, 0.456, 0.406]
+            std: [0.229, 0.224, 0.225]
+            order: ''
+        - ToCHWImage:
+    mix:
+        - MixupOperator:
+            alpha: 0.2
+
+VALID:
+    batch_size: 64
+    num_workers: 4
+    file_list: "/media/gujingxiao/f577505e-73a2-41d0-829c-eb4d01efa827/BaiduStar2020/final_classification/val_list.txt"
+    data_dir: "/media/gujingxiao/f577505e-73a2-41d0-829c-eb4d01efa827/BaiduStar2020/final_classification/"
+    shuffle_seed: 0
+    transforms:
+        - DecodeImage:
+            to_rgb: True
+            to_np: False
+            channel_first: False
+        - ResizeImage:
+            resize_short: 160
+        - CropImage:
+            size: 160
+        - NormalizeImage:
+            scale: 1.0/255.0
+            mean: [0.485, 0.456, 0.406]
+            std: [0.229, 0.224, 0.225]
+            order: ''
+        - ToCHWImage:
